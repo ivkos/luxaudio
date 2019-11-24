@@ -8,6 +8,7 @@ import (
 	"github.com/gen2brain/malgo"
 	"github.com/mjibson/go-dsp/fft"
 	"github.com/mjibson/go-dsp/window"
+	"luxaudio/led"
 	"luxaudio/utils"
 	"math/cmplx"
 	"os"
@@ -67,7 +68,7 @@ func main() {
 			magnitudes[i] = cmplx.Abs(ffs[i])
 		}
 
-		for i := 0; i < int(ledCount); i++ {
+		for i := 0; i < ledCount; i++ {
 			v := float64(0)
 			for j := 0; j < 2; j++ {
 				v = v + magnitudes[2*i+j]
@@ -84,9 +85,7 @@ func main() {
 			}
 		}
 
-		ledPayload := append([]byte{0x4C, 0x58, 0x0, byte(ledCount)}, ledData...)
-
-		_, err = conn.Write(ledPayload)
+		_, err = conn.Write(led.MakeRawModeLuxPayload(uint8(ledCount), ledData))
 		utils.CheckErr(err)
 	}
 
