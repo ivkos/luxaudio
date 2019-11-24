@@ -45,7 +45,8 @@ func main() {
 		monoFloats := make([]float64, dataLen/sizeInBytes/2)
 
 		for i := range monoFloats {
-			monoFloats[i] = float64(utils.Average(actualData[i], actualData[i+1]))
+			average := (float64(actualData[i]) + float64(actualData[i+1])) / 2
+			monoFloats[i] = average
 
 			if len(sampleChan) >= fftSize {
 				<-sampleChan
