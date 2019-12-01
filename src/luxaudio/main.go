@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	luxsrvHost, luxsrvPort, ledCount, fftSize, sampleRate, channels := utils.GetFlags()
+	luxsrvHost, luxsrvPort, ledCount, fftSize, sampleRate, channels, decayFactor := utils.GetFlags()
 
 	context, captureConfig := initMalgo(uint32(channels), uint32(sampleRate))
 	defer func() {
@@ -29,7 +29,7 @@ func main() {
 		utils.CheckErr(err)
 	}
 
-	analyzer := analyzers.NewSmartAnalyzer(fftSize, ledCount, float64(sampleRate))
+	analyzer := analyzers.NewSmartAnalyzer(fftSize, ledCount, float64(sampleRate), decayFactor)
 	queue := analyzers.NewQueue(fftSize, &analyzer, &payloadSender)
 	frameReceiver := audio.NewFrameReceiver(
 		malgo.SampleSizeInBytes(captureConfig.Capture.Format),

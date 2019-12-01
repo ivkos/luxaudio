@@ -22,9 +22,11 @@ type SmartAnalyzer struct {
 
 	pwelchOptions *spectral.PwelchOptions
 	freqs         []float64
+
+	decayFactor float64
 }
 
-func NewSmartAnalyzer(fftSize int, ledCount int, sampleRate float64) Analyzer {
+func NewSmartAnalyzer(fftSize int, ledCount int, sampleRate float64, decayFactor float64) Analyzer {
 	return &SmartAnalyzer{
 		fftSize:    fftSize,
 		ledCount:   ledCount,
@@ -40,6 +42,8 @@ func NewSmartAnalyzer(fftSize int, ledCount int, sampleRate float64) Analyzer {
 			Window:    window.Hann,
 			Scale_off: true,
 		},
+
+		decayFactor: decayFactor,
 	}
 }
 
@@ -52,7 +56,13 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 		magnitude := real(x)*real(x) + imag(x)*imag(x)
 
 		db := 10 * math.Log10(magnitude/math.Pow(float64(sa.fftSize), 2))
-		sa.intensities[i] = math.Min((math.Max(-75, db)+75)/75, 1)
+		newIntensity := math.Min((math.Max(-75, db)+75)/75, 1)
+
+		if sa.decayFactor != float64(0) && newIntensity <= sa.intensities[i] {
+			sa.intensities[i] *= sa.decayFactor
+		} else {
+			sa.intensities[i] = newIntensity
+		}
 	}
 
 	if !sa.freqsInit {
