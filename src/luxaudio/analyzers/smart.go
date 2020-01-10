@@ -75,10 +75,11 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 	spectrum := utils.ChunkedMean(sa.intensities[sa.loF:sa.hiF], sa.ledCount)
 	spectrum = utils.CenterArray(spectrum, sa.ledCount)
 
+	var r, g, b float64 = 255, 0, 255
 	for i, x := range spectrum {
-		sa.ledData[i*3+0] = byte(128 * x)
-		sa.ledData[i*3+1] = byte(255 * x)
-		sa.ledData[i*3+2] = byte(64 * x)
+		sa.ledData[i*3+0] = byte(g * x)
+		sa.ledData[i*3+1] = byte(r * x)
+		sa.ledData[i*3+2] = byte(b * x)
 	}
 
 	return sa.ledData
