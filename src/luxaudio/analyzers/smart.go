@@ -115,3 +115,15 @@ func (sa *SmartAnalyzer) calculateFreqs() []float64 {
 	}
 	return freqs
 }
+
+func Ra(f float64) float64 {
+	return (math.Pow(12194, 2) * math.Pow(f, 4)) /
+		((math.Pow(f, 2) + math.Pow(20.6, 2)) *
+			math.Sqrt((math.Pow(f, 2)+math.Pow(107.7, 2))*
+				(math.Pow(f, 2)+math.Pow(737.9, 2))) *
+			(math.Pow(f, 2) + math.Pow(12194, 2)))
+}
+
+func Aw(f float64) float64 {
+	return 20*math.Log10(Ra(f)) - 20*math.Log10(Ra(1000))
+}
