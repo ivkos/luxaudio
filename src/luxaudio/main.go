@@ -8,13 +8,17 @@ import (
 	"luxaudio/audio"
 	"luxaudio/led"
 	"luxaudio/utils"
+	"runtime"
 	"time"
 )
 
 func main() {
-	luxsrvHost, luxsrvPort, ledCount, fftSize, sampleRate, channels, decayFactor, dbfsThreshold := utils.GetFlags()
+	luxsrvHost, luxsrvPort, ledCount, fftSize, sampleRate, channels, decayFactor, dbfsThreshold, backend, deviceFlag := utils.GetFlags()
 
-	context, captureConfig := initMalgo(uint32(channels), uint32(sampleRate))
+	malgoBackend := getBackend(backend)
+	malgoDevice := getDevice(deviceFlag)
+
+	context, captureConfig := initMalgo(uint32(channels), uint32(sampleRate), malgoBackend, malgoDevice)
 	defer func() {
 		_ = context.Uninit()
 		context.Free()
@@ -60,21 +64,69 @@ func main() {
 	fmt.Scanln()
 }
 
-func initMalgo(channels uint32, sampleRate uint32) (*malgo.AllocatedContext, malgo.DeviceConfig) {
+func initMalgo(channels uint32, sampleRate uint32, backend malgo.Backend, device malgo.DeviceType) (*malgo.AllocatedContext, malgo.DeviceConfig) {
 	ctxConfig := malgo.ContextConfig{}
 	ctxConfig.ThreadPriority = malgo.ThreadPriorityRealtime
 
-	context, err := malgo.InitContext([]malgo.Backend{malgo.BackendWasapi}, ctxConfig, func(message string) {
+	context, err := malgo.InitContext([]malgo.Backend{backend}, ctxConfig, func(message string) {
 		log.Printf("LOG <%v>\n", message)
 	})
 	utils.CheckErr(err)
 
 	captureConfig := malgo.DefaultDeviceConfig()
 	captureConfig.PerformanceProfile = malgo.LowLatency
-	captureConfig.DeviceType = malgo.Loopback
+	captureConfig.DeviceType = device
 	captureConfig.Capture.Format = malgo.FormatF32
 	captureConfig.SampleRate = sampleRate
 	captureConfig.Capture.Channels = channels
 
 	return context, captureConfig
+}
+
+func getBackend(backend string) malgo.Backend {
+	switch backend {
+	case "auto":
+		switch os := runtime.GOOS; os {
+		case "linux":
+			return malgo.BackendAlsa
+
+		case "windows":
+			return malgo.BackendWasapi
+
+		default:
+			log.Fatalf("Unsupported operating system: %s", os)
+		}
+
+	case "alsa":
+		return malgo.BackendAlsa
+
+	case "pulse":
+		return malgo.BackendPulseaudio
+
+	case "jack":
+		return malgo.BackendJack
+
+	case "wasapi":
+		return malgo.BackendWasapi
+
+	default:
+		log.Fatalf("Unsupported backend: %s", backend)
+	}
+
+	return malgo.BackendNull
+}
+
+func getDevice(device string) malgo.DeviceType {
+	switch device {
+	case "loopback":
+		return malgo.Loopback
+
+	case "capture":
+		return malgo.Capture
+
+	default:
+		log.Fatalf("Unsupported device: %s", device)
+	}
+
+	return 0
 }

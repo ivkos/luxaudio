@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func GetFlags() (string, uint16, int, int, int, int, float64, float64) {
+func GetFlags() (string, uint16, int, int, int, int, float64, float64, string, string) {
 	var host = flag.String("host", "", "host of the luxsrv")
 	var port = flag.Uint("port", DefaultPort, "port of the luxsrv")
 	var ledCount = flag.Int("leds", 0, "number of LEDs to be driven (max 255)")
@@ -14,6 +14,8 @@ func GetFlags() (string, uint16, int, int, int, int, float64, float64) {
 	var channels = flag.Int("channels", 2, "number of channels")
 	var decay = flag.Float64("decay", 0.50, "decay factor [0,1] controls the smoothness of the visualization")
 	var dbfsThreshold = flag.Float64("dbfsThreshold", 75, "dBFS threshold")
+	var backend = flag.String("backend", "auto", "audio backend (auto, wasapi, alsa, pulse, jack)")
+	var device = flag.String("device", "loopback", "device to use (loopback, capture)")
 
 	flag.Parse()
 
@@ -22,5 +24,5 @@ func GetFlags() (string, uint16, int, int, int, int, float64, float64) {
 		os.Exit(2)
 	}
 
-	return *host, uint16(*port), *ledCount, *fftSize, *sampleRate, *channels, *decay, *dbfsThreshold
+	return *host, uint16(*port), *ledCount, *fftSize, *sampleRate, *channels, *decay, *dbfsThreshold, *backend, *device
 }
