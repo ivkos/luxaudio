@@ -13,6 +13,8 @@ type FrameReceiver struct {
 	queue             *analyzers.Queue
 }
 
+type SampleFormat float32
+
 func NewFrameReceiver(sampleSizeInBytes int, channels int, queue *analyzers.Queue) *FrameReceiver {
 	return &FrameReceiver{
 		sampleSizeInBytes: sampleSizeInBytes,
@@ -22,7 +24,7 @@ func NewFrameReceiver(sampleSizeInBytes int, channels int, queue *analyzers.Queu
 }
 
 func (fr *FrameReceiver) OnReceive(data []byte, frameCount uint32) {
-	convertedData := make([]float32, len(data)/fr.sampleSizeInBytes)
+	convertedData := make([]SampleFormat, len(data)/fr.sampleSizeInBytes)
 	err := binary.Read(bytes.NewReader(data), binary.LittleEndian, &convertedData)
 	utils.CheckErr(err)
 
@@ -32,7 +34,7 @@ func (fr *FrameReceiver) OnReceive(data []byte, frameCount uint32) {
 	fr.queue.Enqueue(monoFloats, false)
 }
 
-func (fr *FrameReceiver) downsampleToMono(convertedData []float32) []float64 {
+func (fr *FrameReceiver) downsampleToMono(convertedData []SampleFormat) []float64 {
 	monoFloats := make([]float64, len(convertedData)/fr.channels)
 
 	for i := range monoFloats {
