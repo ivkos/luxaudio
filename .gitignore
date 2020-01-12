@@ -15,7 +15,8 @@
 
 # Dependency directories (remove the comment below to include it)
 vendor/
-src/github.com/
+src/*
+!src/luxaudio
 
 # Binary output
 bin/
