@@ -13,28 +13,28 @@ import (
 )
 
 func main() {
-	luxsrvHost, luxsrvPort, ledCount, fftSize, sampleRate, channels, decayFactor, dbfsThreshold, backend, deviceFlag := utils.GetFlags()
+	f := utils.GetFlags()
 
-	malgoBackend := getBackend(backend)
-	malgoDevice := getDevice(deviceFlag)
+	malgoBackend := getBackend(f.Backend)
+	malgoDevice := getDevice(f.Device)
 
-	context, captureConfig := initMalgo(uint32(channels), uint32(sampleRate), malgoBackend, malgoDevice)
+	context, captureConfig := initMalgo(uint32(f.Channels), uint32(f.SampleRate), malgoBackend, malgoDevice)
 	defer func() {
 		_ = context.Uninit()
 		context.Free()
 	}()
 
 	// Create UDP socket
-	conn := utils.GetUDPConn(luxsrvHost, luxsrvPort)
+	conn := utils.GetUDPConn(f.Host, f.Port)
 	defer func() { _ = conn.Close() }()
 
 	payloadSender := func(ledData []byte) {
-		_, err := conn.Write(led.MakeRawModeLuxPayload(uint8(ledCount), ledData))
+		_, err := conn.Write(led.MakeRawModeLuxPayload(uint8(f.LedCount), ledData))
 		utils.CheckErr(err)
 	}
 
-	analyzer := analyzers.NewSmartAnalyzer(fftSize, ledCount, float64(sampleRate), decayFactor, dbfsThreshold)
-	queue := analyzers.NewQueue(fftSize, &analyzer, &payloadSender)
+	analyzer := analyzers.NewSmartAnalyzer(f.FftSize, f.LedCount, float64(f.SampleRate), f.Decay, f.DbfsThreshold)
+	queue := analyzers.NewQueue(f.FftSize, &analyzer, &payloadSender)
 	frameReceiver := audio.NewFrameReceiver(
 		malgo.SampleSizeInBytes(captureConfig.Capture.Format),
 		int(captureConfig.Capture.Channels),
