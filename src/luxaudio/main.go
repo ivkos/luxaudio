@@ -42,6 +42,7 @@ func main() {
 		f.AudibleLow,
 		f.AudibleHigh,
 		f.Mirror,
+		f.Color,
 	)
 
 	queue := analyzers.NewQueue(f.FftSize, &analyzer, &payloadSender)

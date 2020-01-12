@@ -3,6 +3,7 @@ package analyzers
 import (
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/fourier"
+	"image/color"
 	"luxaudio/utils"
 	"math"
 	"math/cmplx"
@@ -27,6 +28,8 @@ type SmartAnalyzer struct {
 	fft    *fourier.FFT
 
 	mirror bool
+
+	color color.RGBA
 }
 
 func NewSmartAnalyzer(
@@ -38,6 +41,7 @@ func NewSmartAnalyzer(
 	audibleLow float64,
 	audibleHigh float64,
 	mirror bool,
+	color color.RGBA,
 ) Analyzer {
 	intensitiesLength := fftSize/2 + 1
 
@@ -62,6 +66,8 @@ func NewSmartAnalyzer(
 		fft:    fourier.NewFFT(fftSize),
 
 		mirror: mirror,
+
+		color: color,
 	}
 }
 
@@ -91,11 +97,10 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 	result = utils.ChunkedMean(result, sa.ledCount)
 	result = utils.CenterArray(result, sa.ledCount)
 
-	var r, g, b float64 = 255, 0, 255
 	for i, x := range result {
-		sa.ledData[i*3+0] = byte(g * x)
-		sa.ledData[i*3+1] = byte(r * x)
-		sa.ledData[i*3+2] = byte(b * x)
+		sa.ledData[i*3+0] = byte(float64(sa.color.G) * x)
+		sa.ledData[i*3+1] = byte(float64(sa.color.R) * x)
+		sa.ledData[i*3+2] = byte(float64(sa.color.B) * x)
 	}
 
 	return sa.ledData

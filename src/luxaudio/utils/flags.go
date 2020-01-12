@@ -2,7 +2,9 @@ package utils
 
 import (
 	"flag"
+	"image/color"
 	"os"
+	"strconv"
 )
 
 type FlagsResult struct {
@@ -25,6 +27,8 @@ type FlagsResult struct {
 	AudibleHigh float64
 
 	Mirror bool
+
+	Color color.RGBA
 }
 
 func GetFlags() FlagsResult {
@@ -48,9 +52,17 @@ func GetFlags() FlagsResult {
 
 	var mirror = flag.Bool("mirror", false, "mirror mode with lower frequencies at the middle")
 
+	var color = flag.String("color", "ff00ff", "hex color")
+
 	flag.Parse()
 
 	if *host == "" || *ledCount == 0 || *ledCount > 255 || *sampleRate == 0 {
+		flag.Usage()
+		os.Exit(2)
+	}
+
+	rgb, err := parseColor(*color)
+	if err != nil {
 		flag.Usage()
 		os.Exit(2)
 	}
@@ -75,5 +87,17 @@ func GetFlags() FlagsResult {
 		AudibleHigh: *audibleHigh,
 
 		Mirror: *mirror,
+
+		Color: rgb,
 	}
+}
+
+func parseColor(s string) (rgb color.RGBA, err error) {
+	c, err := strconv.ParseUint(s, 16, 24)
+
+	rgb.R = uint8((c & 0xFF0000) >> 16)
+	rgb.G = uint8((c & 0x00FF00) >> 8)
+	rgb.B = uint8((c & 0x0000FF))
+
+	return rgb, err
 }

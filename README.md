@@ -32,6 +32,7 @@ over the network.
     --dbfsThreshold -64 \
     --audibleLow 30 \
     --audibleHigh 17000 \
+    --color 9dfc03 \
     --mirror true
 ```
 
@@ -46,6 +47,8 @@ Usage of ./luxaudio:
         audio backend (auto, wasapi, alsa, pulse, jack) (default "auto")
   -channels int
         number of channels (default 2)
+  -color string
+        hex color (default "ff00ff")
   -dbfsThreshold float
         dBFS threshold (default -96.32959861247399)
   -decay float
