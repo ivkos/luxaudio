@@ -13,7 +13,7 @@ func GetFlags() (string, uint16, int, int, int, int, float64, float64, string, s
 	var sampleRate = flag.Int("sampleRate", 0, "sample rate")
 	var channels = flag.Int("channels", 2, "number of channels")
 	var decay = flag.Float64("decay", 0.50, "decay factor [0,1] controls the smoothness of the visualization")
-	var dbfsThreshold = flag.Float64("dbfsThreshold", 75, "dBFS threshold")
+	var dbfsThreshold = flag.Float64("dbfsThreshold", -GetSQNR(16), "dBFS threshold")
 	var backend = flag.String("backend", "auto", "audio backend (auto, wasapi, alsa, pulse, jack)")
 	var device = flag.String("device", "loopback", "device to use (loopback, capture)")
 

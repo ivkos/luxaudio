@@ -29,7 +29,7 @@ over the network.
     --sampleRate 44100 \
     --fft 1024 \
     --decay 0.5 \
-    --dbfsThreshold 64
+    --dbfsThreshold -64
 ```
 
 ### Usage
@@ -40,7 +40,7 @@ Usage of ./luxaudio:
   -channels int
         number of channels (default 2)
   -dbfsThreshold float
-        dBFS threshold (default 75)
+        dBFS threshold (default -96.32959861247399)
   -decay float
         decay factor [0,1] controls the smoothness of the visualization (default 0.5)
   -device string

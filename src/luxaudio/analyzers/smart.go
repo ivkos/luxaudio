@@ -50,7 +50,7 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 		magnitude := real(x)*real(x) + imag(x)*imag(x)
 
 		db := 10 * math.Log10(magnitude/math.Pow(float64(sa.fftSize)/2, 2))
-		newIntensity := math.Min((math.Max(-sa.dbfsThreshold, db)+sa.dbfsThreshold)/sa.dbfsThreshold, 1)
+		newIntensity := math.Min((math.Max(sa.dbfsThreshold, db)-sa.dbfsThreshold)/-sa.dbfsThreshold, 1)
 
 		if sa.decayFactor != float64(0) && newIntensity <= sa.intensities[i] {
 			sa.intensities[i] *= sa.decayFactor
