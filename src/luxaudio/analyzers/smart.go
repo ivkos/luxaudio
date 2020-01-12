@@ -2,7 +2,6 @@ package analyzers
 
 import (
 	"github.com/mjibson/go-dsp/fft"
-	"github.com/mjibson/go-dsp/spectral"
 	"github.com/mjibson/go-dsp/window"
 	"luxaudio/utils"
 	"math"
@@ -20,8 +19,7 @@ type SmartAnalyzer struct {
 	loF       int
 	hiF       int
 
-	pwelchOptions *spectral.PwelchOptions
-	freqs         []float64
+	freqs []float64
 
 	decayFactor   float64
 	dbfsThreshold float64
@@ -37,12 +35,6 @@ func NewSmartAnalyzer(fftSize int, ledCount int, sampleRate float64, decayFactor
 		ledData:     make([]byte, ledCount*3),
 
 		freqsInit: false,
-
-		pwelchOptions: &spectral.PwelchOptions{
-			NFFT:      fftSize,
-			Window:    window.Hann,
-			Scale_off: true,
-		},
 
 		decayFactor:   decayFactor,
 		dbfsThreshold: dbfsThreshold,
