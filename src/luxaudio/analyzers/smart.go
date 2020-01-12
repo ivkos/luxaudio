@@ -1,10 +1,11 @@
 package analyzers
 
 import (
-	"github.com/mjibson/go-dsp/fft"
-	"github.com/mjibson/go-dsp/window"
+	"gonum.org/v1/gonum/floats"
+	"gonum.org/v1/gonum/fourier"
 	"luxaudio/utils"
 	"math"
+	"math/cmplx"
 )
 
 type SmartAnalyzer struct {
@@ -15,41 +16,51 @@ type SmartAnalyzer struct {
 	intensities []float64
 	ledData     []byte
 
-	freqsInit bool
-	loF       int
-	hiF       int
-
 	freqs []float64
+	loF   int
+	hiF   int
 
 	decayFactor   float64
 	dbfsThreshold float64
+
+	window []float64
+	fft    *fourier.FFT
 }
 
 func NewSmartAnalyzer(fftSize int, ledCount int, sampleRate float64, decayFactor float64, dbfsThreshold float64) Analyzer {
+	intensitiesLength := fftSize/2 + 1
+
+	freqs := calculateFreqs(intensitiesLength, sampleRate, fftSize)
+
 	return &SmartAnalyzer{
 		fftSize:    fftSize,
 		ledCount:   ledCount,
 		sampleRate: sampleRate,
 
-		intensities: make([]float64, fftSize/2),
+		intensities: make([]float64, intensitiesLength),
 		ledData:     make([]byte, ledCount*3),
 
-		freqsInit: false,
+		freqs: freqs,
+		loF:   getLowFreqIndex(freqs),
+		hiF:   getHighFreqIndex(freqs),
 
 		decayFactor:   decayFactor,
 		dbfsThreshold: dbfsThreshold,
+
+		window: getHannWindow(fftSize),
+		fft:    fourier.NewFFT(fftSize),
 	}
 }
 
 func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
-	window.Apply(sampleChunk, window.Hann)
-	ffs := fft.FFTReal(sampleChunk)
+	floats.Mul(sampleChunk, sa.window)
+	ffs := sa.fft.Coefficients(nil, sampleChunk)
 
 	for i := range sa.intensities {
 		x := ffs[i]
-		magnitude := real(x)*real(x) + imag(x)*imag(x)
+		magnitude := cmplx.Abs(x)
 
-		db := 10 * math.Log10(magnitude/math.Pow(float64(sa.fftSize)/2, 2))
+		db := 20 * math.Log10(magnitude/(float64(sa.fftSize)/4))
 		newIntensity := math.Min((math.Max(sa.dbfsThreshold, db)-sa.dbfsThreshold)/-sa.dbfsThreshold, 1)
 
 		if sa.decayFactor != float64(0) && newIntensity <= sa.intensities[i] {
@@ -59,14 +70,7 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 		}
 	}
 
-	if !sa.freqsInit {
-		sa.freqs = sa.calculateFreqs()
-		sa.loF = getLowFreqIndex(sa.freqs)
-		sa.hiF = getHighFreqIndex(sa.freqs)
-		sa.freqsInit = true
-	}
-
-	spectrum := utils.ChunkedMean(sa.intensities[sa.loF:sa.hiF], sa.ledCount)
+	spectrum := utils.ChunkedMean(sa.intensities[sa.loF:sa.hiF+1], sa.ledCount)
 	spectrum = utils.CenterArray(spectrum, sa.ledCount)
 
 	var r, g, b float64 = 255, 0, 255
@@ -102,9 +106,9 @@ func getHighFreqIndex(frequencies []float64) int {
 	return len(frequencies) - 1
 }
 
-func (sa *SmartAnalyzer) calculateFreqs() []float64 {
-	freqs := make([]float64, sa.fftSize/2)
-	coef := sa.sampleRate / float64(sa.fftSize)
+func calculateFreqs(size int, sampleRate float64, fftSize int) []float64 {
+	freqs := make([]float64, size)
+	coef := sampleRate / float64(fftSize)
 	for i := range freqs {
 		freqs[i] = float64(i) * coef
 	}
@@ -121,4 +125,20 @@ func Ra(f float64) float64 {
 
 func Aw(f float64) float64 {
 	return 20*math.Log10(Ra(f)) - 20*math.Log10(Ra(1000))
+}
+
+func getHannWindow(size int) []float64 {
+	r := make([]float64, size)
+
+	if size == 1 {
+		r[0] = 1
+	} else {
+		N := size - 1
+		coef := 2 * math.Pi / float64(N)
+		for n := 0; n <= N; n++ {
+			r[n] = 0.5 * (1 - math.Cos(coef*float64(n)))
+		}
+	}
+
+	return r
 }
