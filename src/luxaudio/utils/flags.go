@@ -20,6 +20,9 @@ type FlagsResult struct {
 
 	Backend string
 	Device  string
+
+	AudibleLow  float64
+	AudibleHigh float64
 }
 
 func GetFlags() FlagsResult {
@@ -37,6 +40,9 @@ func GetFlags() FlagsResult {
 
 	var backend = flag.String("backend", "auto", "audio backend (auto, wasapi, alsa, pulse, jack)")
 	var device = flag.String("device", "loopback", "device to use (loopback, capture)")
+
+	var audibleLow = flag.Float64("audibleLow", 20, "lower audible frequency")
+	var audibleHigh = flag.Float64("audibleHigh", 20000, "upper audible frequency")
 
 	flag.Parse()
 
@@ -60,5 +66,8 @@ func GetFlags() FlagsResult {
 
 		Backend: *backend,
 		Device:  *device,
+
+		AudibleLow:  *audibleLow,
+		AudibleHigh: *audibleHigh,
 	}
 }

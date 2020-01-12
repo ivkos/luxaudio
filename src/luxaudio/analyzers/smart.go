@@ -27,7 +27,15 @@ type SmartAnalyzer struct {
 	fft    *fourier.FFT
 }
 
-func NewSmartAnalyzer(fftSize int, ledCount int, sampleRate float64, decayFactor float64, dbfsThreshold float64) Analyzer {
+func NewSmartAnalyzer(
+	fftSize int,
+	ledCount int,
+	sampleRate float64,
+	decayFactor float64,
+	dbfsThreshold float64,
+	audibleLow float64,
+	audibleHigh float64,
+) Analyzer {
 	intensitiesLength := fftSize/2 + 1
 
 	freqs := calculateFreqs(intensitiesLength, sampleRate, fftSize)
@@ -41,8 +49,8 @@ func NewSmartAnalyzer(fftSize int, ledCount int, sampleRate float64, decayFactor
 		ledData:     make([]byte, ledCount*3),
 
 		freqs: freqs,
-		loF:   getLowFreqIndex(freqs),
-		hiF:   getHighFreqIndex(freqs),
+		loF:   getLowFreqIndex(freqs, audibleLow),
+		hiF:   getHighFreqIndex(freqs, audibleHigh),
 
 		decayFactor:   decayFactor,
 		dbfsThreshold: dbfsThreshold,
@@ -83,12 +91,9 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 	return sa.ledData
 }
 
-const hearingRangeLow = 20
-const hearingRangeHigh = 20000
-
-func getLowFreqIndex(frequencies []float64) int {
+func getLowFreqIndex(frequencies []float64, audibleLow float64) int {
 	for i, f := range frequencies {
-		if f >= hearingRangeLow {
+		if f >= audibleLow {
 			return i
 		}
 	}
@@ -96,9 +101,9 @@ func getLowFreqIndex(frequencies []float64) int {
 	return 0
 }
 
-func getHighFreqIndex(frequencies []float64) int {
+func getHighFreqIndex(frequencies []float64, audibleHigh float64) int {
 	for i, f := range frequencies {
-		if f >= hearingRangeHigh {
+		if f >= audibleHigh {
 			return i
 		}
 	}

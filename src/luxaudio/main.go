@@ -33,7 +33,16 @@ func main() {
 		utils.CheckErr(err)
 	}
 
-	analyzer := analyzers.NewSmartAnalyzer(f.FftSize, f.LedCount, float64(f.SampleRate), f.Decay, f.DbfsThreshold)
+	analyzer := analyzers.NewSmartAnalyzer(
+		f.FftSize,
+		f.LedCount,
+		float64(f.SampleRate),
+		f.Decay,
+		f.DbfsThreshold,
+		f.AudibleLow,
+		f.AudibleHigh,
+	)
+
 	queue := analyzers.NewQueue(f.FftSize, &analyzer, &payloadSender)
 	frameReceiver := audio.NewFrameReceiver(
 		malgo.SampleSizeInBytes(captureConfig.Capture.Format),
