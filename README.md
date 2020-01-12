@@ -29,12 +29,19 @@ over the network.
     --sampleRate 44100 \
     --fft 1024 \
     --decay 0.5 \
-    --dbfsThreshold -64
+    --dbfsThreshold -64 \
+    --audibleLow 30 \
+    --audibleHigh 17000 \
+    --mirror true
 ```
 
 ### Usage
 ```
 Usage of ./luxaudio:
+  -audibleHigh float
+        upper audible frequency (default 20000)
+  -audibleLow float
+        lower audible frequency (default 20)
   -backend string
         audio backend (auto, wasapi, alsa, pulse, jack) (default "auto")
   -channels int
@@ -51,6 +58,8 @@ Usage of ./luxaudio:
         host of the luxsrv
   -leds int
         number of LEDs to be driven (max 255)
+  -mirror
+        mirror mode with lower frequencies at the middle
   -port uint
         port of the luxsrv (default 42170)
   -sampleRate int
