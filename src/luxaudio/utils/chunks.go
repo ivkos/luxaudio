@@ -1,6 +1,8 @@
 package utils
 
-import "math"
+import (
+	"gonum.org/v1/gonum/stat"
+)
 
 func Chunk(data []float64, desiredChunks int) [][]float64 {
 	var divided [][]float64
@@ -25,70 +27,10 @@ func ChunkedMean(data []float64, desiredChunks int) []float64 {
 
 	result := make([]float64, len(chunks))
 	for i := range result {
-		result[i] = MeanOfSlice(chunks[i])
+		result[i] = stat.Mean(chunks[i], nil)
 	}
 
 	return result
-}
-
-func MeanOfSlice(data []float64) float64 {
-	dataLen := len(data)
-	if dataLen == 0 {
-		return 0
-	}
-
-	var total float64 = 0
-
-	for _, value := range data {
-		total += value
-	}
-
-	return total / float64(dataLen)
-}
-
-func RmsOfSlice(data []float64) float64 {
-	var total float64 = 0
-
-	for _, value := range data {
-		total += value * value
-	}
-
-	return math.Sqrt(total / float64(len(data)))
-}
-
-func MaxOfSlice(data []float64) float64 {
-	max := math.Inf(-1)
-
-	for _, x := range data {
-		if x > max {
-			max = x
-		}
-	}
-
-	return max
-}
-
-func MaxAbsOfSlice(data []float64) float64 {
-	max := math.Inf(-1)
-
-	for _, x := range data {
-		abs := math.Abs(x)
-		if abs > max {
-			max = abs
-		}
-	}
-
-	return max
-}
-
-func SumOfSlice(data []float64) float64 {
-	sum := float64(0)
-
-	for _, x := range data {
-		sum += x
-	}
-
-	return sum
 }
 
 func CenterArray(arr []float64, total int) []float64 {
