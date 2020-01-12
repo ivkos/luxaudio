@@ -41,6 +41,7 @@ func main() {
 		f.DbfsThreshold,
 		f.AudibleLow,
 		f.AudibleHigh,
+		f.Mirror,
 	)
 
 	queue := analyzers.NewQueue(f.FftSize, &analyzer, &payloadSender)

@@ -25,6 +25,8 @@ type SmartAnalyzer struct {
 
 	window []float64
 	fft    *fourier.FFT
+
+	mirror bool
 }
 
 func NewSmartAnalyzer(
@@ -35,6 +37,7 @@ func NewSmartAnalyzer(
 	dbfsThreshold float64,
 	audibleLow float64,
 	audibleHigh float64,
+	mirror bool,
 ) Analyzer {
 	intensitiesLength := fftSize/2 + 1
 
@@ -57,6 +60,8 @@ func NewSmartAnalyzer(
 
 		window: getHannWindow(fftSize),
 		fft:    fourier.NewFFT(fftSize),
+
+		mirror: mirror,
 	}
 }
 
@@ -78,17 +83,32 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 		}
 	}
 
-	spectrum := utils.ChunkedMean(sa.intensities[sa.loF:sa.hiF+1], sa.ledCount)
-	spectrum = utils.CenterArray(spectrum, sa.ledCount)
+	result := sa.intensities[sa.loF : sa.hiF+1]
+	if sa.mirror {
+		result = mirrorResult(result)
+	}
+
+	result = utils.ChunkedMean(result, sa.ledCount)
+	result = utils.CenterArray(result, sa.ledCount)
 
 	var r, g, b float64 = 255, 0, 255
-	for i, x := range spectrum {
+	for i, x := range result {
 		sa.ledData[i*3+0] = byte(g * x)
 		sa.ledData[i*3+1] = byte(r * x)
 		sa.ledData[i*3+2] = byte(b * x)
 	}
 
 	return sa.ledData
+}
+
+func mirrorResult(original []float64) []float64 {
+	reversed := append([]float64{}, original...)
+	floats.Reverse(reversed)
+
+	result := append([]float64{}, reversed...)
+	result = append(result, original...)
+
+	return result
 }
 
 func getLowFreqIndex(frequencies []float64, audibleLow float64) int {

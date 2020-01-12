@@ -23,6 +23,8 @@ type FlagsResult struct {
 
 	AudibleLow  float64
 	AudibleHigh float64
+
+	Mirror bool
 }
 
 func GetFlags() FlagsResult {
@@ -43,6 +45,8 @@ func GetFlags() FlagsResult {
 
 	var audibleLow = flag.Float64("audibleLow", 20, "lower audible frequency")
 	var audibleHigh = flag.Float64("audibleHigh", 20000, "upper audible frequency")
+
+	var mirror = flag.Bool("mirror", false, "mirror mode with lower frequencies at the middle")
 
 	flag.Parse()
 
@@ -69,5 +73,7 @@ func GetFlags() FlagsResult {
 
 		AudibleLow:  *audibleLow,
 		AudibleHigh: *audibleHigh,
+
+		Mirror: *mirror,
 	}
 }
