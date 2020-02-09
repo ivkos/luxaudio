@@ -29,6 +29,8 @@ type FlagsResult struct {
 	Mirror bool
 
 	Color color.RGBA
+
+	Verbose bool
 }
 
 func GetFlags() FlagsResult {
@@ -53,6 +55,8 @@ func GetFlags() FlagsResult {
 	var mirror = flag.Bool("mirror", false, "mirror mode with lower frequencies at the middle")
 
 	var color = flag.String("color", "ff00ff", "hex color")
+
+	var verbose = flag.Bool("verbose", false, "print verbose messages")
 
 	flag.Parse()
 
@@ -89,6 +93,8 @@ func GetFlags() FlagsResult {
 		Mirror: *mirror,
 
 		Color: rgb,
+
+		Verbose: *verbose,
 	}
 }
 

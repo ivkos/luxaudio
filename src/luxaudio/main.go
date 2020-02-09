@@ -51,13 +51,15 @@ func main() {
 		queue,
 	)
 
-	go func() {
-		for {
-			t := time.NewTimer(1 * time.Second)
-			<-t.C
-			log.Printf("len(queue) = %d\n", queue.Size())
-		}
-	}()
+	if f.Verbose {
+		go func() {
+			for {
+				t := time.NewTimer(1 * time.Second)
+				<-t.C
+				log.Printf("len(queue) = %d\n", queue.Size())
+			}
+		}()
+	}
 
 	log.Println("Listening...")
 	device, err := malgo.InitDevice(context.Context, captureConfig, malgo.DeviceCallbacks{
