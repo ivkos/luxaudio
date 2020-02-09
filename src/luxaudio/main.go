@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gen2brain/malgo"
 	"log"
 	"luxaudio/analyzers"
@@ -71,8 +70,7 @@ func main() {
 	err = device.Start()
 	utils.CheckErr(err)
 
-	log.Println("Press Enter to stop listening...")
-	fmt.Scanln()
+	select {}
 }
 
 func initMalgo(channels uint32, sampleRate uint32, backend malgo.Backend, device malgo.DeviceType) (*malgo.AllocatedContext, malgo.DeviceConfig) {
