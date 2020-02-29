@@ -3,7 +3,6 @@ package analyzers
 import (
 	"gonum.org/v1/gonum/floats"
 	"gonum.org/v1/gonum/fourier"
-	"image/color"
 	"luxaudio/utils"
 	"math"
 	"math/cmplx"
@@ -15,7 +14,6 @@ type SmartAnalyzer struct {
 	sampleRate float64
 
 	intensities []float64
-	ledData     []byte
 
 	freqs []float64
 	loF   int
@@ -28,8 +26,6 @@ type SmartAnalyzer struct {
 	fft    *fourier.FFT
 
 	mirror bool
-
-	color color.RGBA
 }
 
 func NewSmartAnalyzer(
@@ -41,7 +37,6 @@ func NewSmartAnalyzer(
 	audibleLow float64,
 	audibleHigh float64,
 	mirror bool,
-	color color.RGBA,
 ) Analyzer {
 	intensitiesLength := fftSize/2 + 1
 
@@ -53,7 +48,6 @@ func NewSmartAnalyzer(
 		sampleRate: sampleRate,
 
 		intensities: make([]float64, intensitiesLength),
-		ledData:     make([]byte, ledCount*3),
 
 		freqs: freqs,
 		loF:   getLowFreqIndex(freqs, audibleLow),
@@ -66,12 +60,10 @@ func NewSmartAnalyzer(
 		fft:    fourier.NewFFT(fftSize),
 
 		mirror: mirror,
-
-		color: color,
 	}
 }
 
-func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
+func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []float64 {
 	floats.Mul(sampleChunk, sa.window)
 	ffs := sa.fft.Coefficients(nil, sampleChunk)
 
@@ -97,13 +89,7 @@ func (sa *SmartAnalyzer) Analyze(sampleChunk []float64) []byte {
 	result = utils.ChunkedMean(result, sa.ledCount)
 	result = utils.CenterArray(result, sa.ledCount)
 
-	for i, x := range result {
-		sa.ledData[i*3+0] = byte(float64(sa.color.G) * x)
-		sa.ledData[i*3+1] = byte(float64(sa.color.R) * x)
-		sa.ledData[i*3+2] = byte(float64(sa.color.B) * x)
-	}
-
-	return sa.ledData
+	return result
 }
 
 func mirrorResult(original []float64) []float64 {

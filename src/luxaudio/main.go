@@ -5,6 +5,7 @@ import (
 	"log"
 	"luxaudio/analyzers"
 	"luxaudio/audio"
+	"luxaudio/effects"
 	"luxaudio/led"
 	"luxaudio/utils"
 	"runtime"
@@ -41,10 +42,13 @@ func main() {
 		f.AudibleLow,
 		f.AudibleHigh,
 		f.Mirror,
-		f.Color,
 	)
 
-	queue := analyzers.NewQueue(f.FftSize, &analyzer, &payloadSender)
+	effect := effects.NewSolidColorEffect(f.LedCount, f.Color)
+	//effect := effects.NewRainbowEffect(f.LedCount, 30)
+	//effect := effects.NewLuxceptionEffect(f.LedCount, "0.0.0.0", utils.DefaultPort)
+
+	queue := analyzers.NewQueue(f.FftSize, &analyzer, &effect, &payloadSender)
 	frameReceiver := audio.NewFrameReceiver(
 		malgo.SampleSizeInBytes(captureConfig.Capture.Format),
 		int(captureConfig.Capture.Channels),
