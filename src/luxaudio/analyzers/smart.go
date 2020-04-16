@@ -2,7 +2,7 @@ package analyzers
 
 import (
 	"gonum.org/v1/gonum/floats"
-	"gonum.org/v1/gonum/fourier"
+	"gonum.org/v1/gonum/dsp/fourier"
 	"luxaudio/utils"
 	"math"
 	"math/cmplx"
