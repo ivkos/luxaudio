@@ -37,9 +37,11 @@ func (e *RainbowEffect) Apply(intensities []float64) []byte {
 
 func (e *RainbowEffect) startRainbow() {
 	offset := 0
+	t := time.NewTimer(0)
+	duration := time.Duration(1000/e.rate) * time.Millisecond
 
 	for {
-		t := time.NewTimer(time.Duration(1000/e.rate) * time.Millisecond)
+		t.Reset(duration)
 		<-t.C
 
 		for i := 0; i < e.ledCount; i++ {
