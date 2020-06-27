@@ -24,7 +24,7 @@ jobs:
 
     - name: Install cross-compilers
       run: |
-        apt-get install -y \
+        sudo apt-get install -y \
           binutils \
           upx-ucl \
           gcc-aarch64-linux-gnu   binutils-aarch64-linux-gnu \
