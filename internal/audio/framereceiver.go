@@ -3,8 +3,8 @@ package audio
 import (
 	"bytes"
 	"encoding/binary"
-	"luxaudio/analyzers"
-	"luxaudio/utils"
+	"github.com/ivkos/luxaudio/internal/analyzers"
+	"github.com/ivkos/luxaudio/internal/utils"
 )
 
 type FrameReceiver struct {

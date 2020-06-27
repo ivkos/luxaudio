@@ -13,11 +13,8 @@ over the network.
 
 ## Quick Start
 
-### Install dependencies
-`GOPATH=$PWD go get -v -d luxaudio`
-
 ### Build
-`GOPATH=$PWD go build -v luxaudio`
+`go build ./cmd/luxaudio`
 
 ### Start
 ```
