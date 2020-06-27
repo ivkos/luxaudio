@@ -1,0 +1,129 @@
+name: Go
+
+on:
+  push:
+    branches: [ master ]
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-20.04
+    steps:
+
+    - name: Set up Go 1.x
+      uses: actions/setup-go@v2
+      with:
+        go-version: ^1.13
+      id: go
+
+    - name: Check out code into the Go module directory
+      uses: actions/checkout@v2
+
+    - name: Get dependencies
+      run: go get -v -t -d ./...
+
+    - name: Install cross-compilers
+      run: |
+        apt-get install -y \
+          binutils \
+          upx-ucl \
+          gcc-aarch64-linux-gnu   binutils-aarch64-linux-gnu \
+          gcc-arm-linux-gnueabi   binutils-arm-linux-gnueabi \
+          gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+
+    - name: Build (linux/amd64)
+      env:
+        CGO_ENABLED: 1
+        GOOS: linux
+        GOARCH: amd64
+      run: |
+        go build -v -o ./bin/luxaudio_linux-amd64 ./cmd/luxaudio
+        strip ./bin/luxaudio_linux-amd64
+        upx -9 ./bin/luxaudio_linux-amd64
+
+    - name: Build (linux/aarch64)
+      env:
+        CGO_ENABLED: 1
+        GOOS: linux
+        GOARCH: arm64
+        CC: aarch64-linux-gnu-gcc
+      run: |
+        go build -v -o ./bin/luxaudio_linux-aarch64 ./cmd/luxaudio
+        aarch64-linux-gnu-strip ./bin/luxaudio_linux-aarch64
+        upx -9 ./bin/luxaudio_linux-aarch64
+
+    - name: Build (linux/armv7)
+      env:
+        CGO_ENABLED: 1
+        GOOS: linux
+        GOARCH: arm
+        GOARM: 7
+        CC: arm-linux-gnueabihf-gcc
+      run: |
+        go build -v -o ./bin/luxaudio_linux-armv7 ./cmd/luxaudio
+        arm-linux-gnueabihf-strip ./bin/luxaudio_linux-armv7
+        upx -9 ./bin/luxaudio_linux-armv7
+
+    - name: Build (linux/armv6)
+      env:
+        CGO_ENABLED: 1
+        GOOS: linux
+        GOARCH: arm
+        GOARM: 6
+        CC: arm-linux-gnueabi-gcc
+      run: |
+        go build -v -o ./bin/luxaudio_linux-armv6 ./cmd/luxaudio
+        arm-linux-gnueabihf-strip ./bin/luxaudio_linux-armv6
+        upx -9 ./bin/luxaudio_linux-armv6
+
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: rc${{ github.run_number }}
+        release_name: Release rc${{ github.run_number }}
+        draft: false
+        prerelease: true
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/luxaudio_linux-amd64
+        asset_name: luxaudio_linux-amd64
+        asset_content_type: application/x-elf
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/luxaudio_linux-aarch64
+        asset_name: luxaudio_linux-aarch64
+        asset_content_type: application/x-elf
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/luxaudio_linux-armv7
+        asset_name: luxaudio_linux-armv7
+        asset_content_type: application/x-elf
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/luxaudio_linux-armv6
+        asset_name: luxaudio_linux-armv6
+        asset_content_type: application/x-elf
