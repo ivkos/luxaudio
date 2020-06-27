@@ -64,4 +64,6 @@ Usage of ./luxaudio:
         port of the luxsrv (default 42170)
   -sampleRate int
         sample rate
+  -verbose
+        print verbose messages
 ```
