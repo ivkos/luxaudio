@@ -15,3 +15,7 @@
 
 # Binary output
 bin/
+
+.idea/
+*.iml
+.vscode/
