@@ -44,9 +44,7 @@ func main() {
 		f.Mirror,
 	)
 
-	effect := effects.NewSolidColorEffect(f.LedCount, f.Color)
-	//effect := effects.NewRainbowEffect(f.LedCount, 30)
-	//effect := effects.NewLuxceptionEffect(f.LedCount, "0.0.0.0", utils.DefaultPort)
+	effect := getEffect(f)
 
 	queue := analyzers.NewQueue(f.FftSize, &analyzer, &effect, &payloadSender)
 	frameReceiver := audio.NewFrameReceiver(
@@ -95,6 +93,23 @@ func initMalgo(channels uint32, sampleRate uint32, backend malgo.Backend, device
 	captureConfig.Capture.Channels = channels
 
 	return context, captureConfig
+}
+
+func getEffect(f utils.FlagsResult) effects.Effect {
+	switch f.Effect {
+	case "solid":
+		return effects.NewSolidColorEffect(f.LedCount, f.Color)
+
+	case "rainbow":
+		return effects.NewRainbowEffect(f.LedCount, 30)
+
+	case "luxception":
+		return effects.NewLuxceptionEffect(f.LedCount, "0.0.0.0", utils.DefaultPort)
+
+	default:
+		log.Fatalf("Unsupported effect: %s", f.Effect)
+		return nil
+	}
 }
 
 func getBackend(backend string) malgo.Backend {

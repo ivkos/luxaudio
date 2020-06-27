@@ -27,6 +27,7 @@ type FlagsResult struct {
 	AudibleHigh float64
 
 	Mirror bool
+	Effect string
 
 	Color color.RGBA
 
@@ -53,6 +54,7 @@ func GetFlags() FlagsResult {
 	var audibleHigh = flag.Float64("audibleHigh", 20000, "upper audible frequency")
 
 	var mirror = flag.Bool("mirror", false, "mirror mode with lower frequencies at the middle")
+	var effect = flag.String("effect", "solid", "color effect (solid, rainbow, luxception)")
 
 	var color = flag.String("color", "ff00ff", "hex color")
 
@@ -91,6 +93,7 @@ func GetFlags() FlagsResult {
 		AudibleHigh: *audibleHigh,
 
 		Mirror: *mirror,
+		Effect: *effect,
 
 		Color: rgb,
 

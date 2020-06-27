@@ -52,6 +52,8 @@ Usage of ./luxaudio:
         decay factor [0,1] controls the smoothness of the visualization (default 0.5)
   -device string
         device to use (loopback, capture) (default "loopback")
+  -effect string
+        color effect (solid, rainbow, luxception) (default "solid")
   -fft int
         FFT size (default 1024)
   -host string
