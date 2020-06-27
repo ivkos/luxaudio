@@ -29,7 +29,8 @@ jobs:
           upx-ucl \
           gcc-aarch64-linux-gnu   binutils-aarch64-linux-gnu \
           gcc-arm-linux-gnueabi   binutils-arm-linux-gnueabi \
-          gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf
+          gcc-arm-linux-gnueabihf binutils-arm-linux-gnueabihf \
+          gcc-mingw-w64           binutils-mingw-w64-i686
 
     - name: Build (linux/amd64)
       env:
@@ -75,6 +76,18 @@ jobs:
         go build -v -o ./bin/luxaudio_linux-armv6 ./cmd/luxaudio
         arm-linux-gnueabihf-strip ./bin/luxaudio_linux-armv6
         upx -9 ./bin/luxaudio_linux-armv6
+
+
+    - name: Build (windows/amd64)
+      env:
+        CGO_ENABLED: 1
+        GOOS: windows
+        GOARCH: amd64
+        CC: x86_64-w64-mingw32-gcc
+      run: |
+        go build -v -o ./bin/luxaudio_windows-amd64.exe ./cmd/luxaudio
+        x86_64-w64-mingw32-strip ./bin/luxaudio_windows-amd64.exe
+        upx -9 ./bin/luxaudio_windows-amd64.exe
 
 
     - name: Create Release
@@ -127,3 +140,13 @@ jobs:
         asset_path: ./bin/luxaudio_linux-armv6
         asset_name: luxaudio_linux-armv6
         asset_content_type: application/x-elf
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./bin/luxaudio_windows-amd64.exe
+        asset_name: luxaudio_windows-amd64.exe
+        asset_content_type: application/vnd.microsoft.portable-executable
