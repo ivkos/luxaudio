@@ -1,8 +1,8 @@
 package analyzers
 
 import (
+	"github.com/ivkos/luxaudio/internal/effects"
 	"log"
-	"luxaudio/effects"
 )
 
 type PayloadSender = func(ledData []byte)

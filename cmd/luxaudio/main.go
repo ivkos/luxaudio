@@ -2,12 +2,12 @@ package main
 
 import (
 	"github.com/gen2brain/malgo"
+	"github.com/ivkos/luxaudio/internal/analyzers"
+	"github.com/ivkos/luxaudio/internal/audio"
+	"github.com/ivkos/luxaudio/internal/effects"
+	"github.com/ivkos/luxaudio/internal/led"
+	"github.com/ivkos/luxaudio/internal/utils"
 	"log"
-	"luxaudio/analyzers"
-	"luxaudio/audio"
-	"luxaudio/effects"
-	"luxaudio/led"
-	"luxaudio/utils"
 	"runtime"
 	"time"
 )
@@ -88,9 +88,8 @@ func initMalgo(channels uint32, sampleRate uint32, backend malgo.Backend, device
 	})
 	utils.CheckErr(err)
 
-	captureConfig := malgo.DefaultDeviceConfig()
+	captureConfig := malgo.DefaultDeviceConfig(device)
 	captureConfig.PerformanceProfile = malgo.LowLatency
-	captureConfig.DeviceType = device
 	captureConfig.Capture.Format = malgo.FormatF32
 	captureConfig.SampleRate = sampleRate
 	captureConfig.Capture.Channels = channels

@@ -1,8 +1,8 @@
 package effects
 
 import (
+	"github.com/ivkos/luxaudio/internal/utils"
 	"log"
-	"luxaudio/utils"
 	"net"
 )
 

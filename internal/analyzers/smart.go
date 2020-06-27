@@ -1,9 +1,9 @@
 package analyzers
 
 import (
-	"gonum.org/v1/gonum/floats"
+	"github.com/ivkos/luxaudio/internal/utils"
 	"gonum.org/v1/gonum/dsp/fourier"
-	"luxaudio/utils"
+	"gonum.org/v1/gonum/floats"
 	"math"
 	"math/cmplx"
 )
