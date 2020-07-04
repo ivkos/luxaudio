@@ -24,14 +24,20 @@ func main() {
 		context.Free()
 	}()
 
-	// Create UDP socket
-	conn := utils.GetUDPConn(f.Host, f.Port)
-	defer func() { _ = conn.Close() }()
+	// Create UDP sockets
+	effectConn := utils.GetUDPConn(f.Host, f.Port)
+	pingerConn := utils.GetUDPConn(f.Host, f.Port)
+	defer func() {
+		_ = effectConn.Close()
+		_ = pingerConn.Close()
+	}()
 
 	payloadSender := func(ledData []byte) {
-		_, err := conn.Write(led.MakeRawModeLuxPayload(uint8(f.LedCount), ledData))
+		_, err := effectConn.Write(led.MakeRawModeLuxPayload(uint8(f.LedCount), ledData))
 		utils.CheckErr(err)
 	}
+
+	pinger := utils.NewPinger(pingerConn, 2*time.Second, f.Verbose)
 
 	analyzer := analyzers.NewSmartAnalyzer(
 		f.FftSize,
@@ -51,6 +57,7 @@ func main() {
 		malgo.SampleSizeInBytes(captureConfig.Capture.Format),
 		int(captureConfig.Capture.Channels),
 		queue,
+		pinger,
 	)
 
 	if f.Verbose {

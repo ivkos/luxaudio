@@ -11,19 +11,25 @@ type FrameReceiver struct {
 	sampleSizeInBytes int
 	channels          int
 	queue             *analyzers.Queue
+	pinger            *utils.Pinger
 }
 
 type SampleFormat float32
 
-func NewFrameReceiver(sampleSizeInBytes int, channels int, queue *analyzers.Queue) *FrameReceiver {
+func NewFrameReceiver(sampleSizeInBytes int, channels int, queue *analyzers.Queue, pinger *utils.Pinger) *FrameReceiver {
 	return &FrameReceiver{
 		sampleSizeInBytes: sampleSizeInBytes,
 		channels:          channels,
 		queue:             queue,
+		pinger:            pinger,
 	}
 }
 
 func (fr *FrameReceiver) OnReceive(data []byte, frameCount uint32) {
+	if !fr.pinger.IsReachable {
+		return
+	}
+
 	convertedData := make([]SampleFormat, len(data)/fr.sampleSizeInBytes)
 	err := binary.Read(bytes.NewReader(data), binary.LittleEndian, &convertedData)
 	utils.CheckErr(err)

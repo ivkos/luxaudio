@@ -4,7 +4,8 @@ type EffectMode byte
 
 // TODO Implement other modes
 const (
-	Raw EffectMode = iota
+	Raw  EffectMode = 0x00
+	Ping EffectMode = 0xFF
 )
 
 var Header = []byte{0x4C, 0x58}
@@ -26,4 +27,8 @@ func MakeRawModeLuxPayload(ledCount uint8, grbData []byte) []byte {
 	effectPayload = append(effectPayload, grbData...)
 
 	return MakeLuxPayload(Raw, effectPayload)
+}
+
+func MakePingPayload() []byte {
+	return MakeLuxPayload(Ping, []byte{})
 }
