@@ -3,6 +3,7 @@ package effects
 import (
 	"github.com/ivkos/luxaudio/internal/led"
 	"github.com/ivkos/luxaudio/internal/utils"
+	"image/color"
 	"log"
 	"net"
 )
@@ -18,7 +19,7 @@ type LuxceptionEffect struct {
 	pinger *utils.Pinger
 }
 
-func NewLuxceptionEffect(ledCount int, host string, port uint16, pinger *utils.Pinger) Effect {
+func NewLuxceptionEffect(ledCount int, defaultColor color.RGBA, host string, port uint16, pinger *utils.Pinger) Effect {
 	e := &LuxceptionEffect{
 		ledCount: ledCount,
 		ledData:  make([]byte, ledCount*3),
@@ -28,6 +29,12 @@ func NewLuxceptionEffect(ledCount int, host string, port uint16, pinger *utils.P
 		port: port,
 
 		pinger: pinger,
+	}
+
+	for i := 0; i < ledCount; i++ {
+		e.colors[i*3+0] = byte(float64(defaultColor.G))
+		e.colors[i*3+1] = byte(float64(defaultColor.R))
+		e.colors[i*3+2] = byte(float64(defaultColor.B))
 	}
 
 	go e.listen()

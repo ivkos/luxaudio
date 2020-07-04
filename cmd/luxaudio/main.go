@@ -111,7 +111,7 @@ func getEffect(f utils.FlagsResult, pinger *utils.Pinger) effects.Effect {
 		return effects.NewRainbowEffect(f.LedCount, 30)
 
 	case "luxception":
-		return effects.NewLuxceptionEffect(f.LedCount, "0.0.0.0", utils.DefaultPort, pinger)
+		return effects.NewLuxceptionEffect(f.LedCount, f.Color, "0.0.0.0", utils.DefaultPort, pinger)
 
 	default:
 		log.Fatalf("Unsupported effect: %s", f.Effect)
