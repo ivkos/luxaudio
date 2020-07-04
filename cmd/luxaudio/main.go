@@ -50,7 +50,7 @@ func main() {
 		f.Mirror,
 	)
 
-	effect := getEffect(f)
+	effect := getEffect(f, pinger)
 
 	queue := analyzers.NewQueue(f.FftSize, &analyzer, &effect, &payloadSender)
 	frameReceiver := audio.NewFrameReceiver(
@@ -102,7 +102,7 @@ func initMalgo(channels uint32, sampleRate uint32, backend malgo.Backend, device
 	return context, captureConfig
 }
 
-func getEffect(f utils.FlagsResult) effects.Effect {
+func getEffect(f utils.FlagsResult, pinger *utils.Pinger) effects.Effect {
 	switch f.Effect {
 	case "solid":
 		return effects.NewSolidColorEffect(f.LedCount, f.Color)
@@ -111,7 +111,7 @@ func getEffect(f utils.FlagsResult) effects.Effect {
 		return effects.NewRainbowEffect(f.LedCount, 30)
 
 	case "luxception":
-		return effects.NewLuxceptionEffect(f.LedCount, "0.0.0.0", utils.DefaultPort)
+		return effects.NewLuxceptionEffect(f.LedCount, "0.0.0.0", utils.DefaultPort, pinger)
 
 	default:
 		log.Fatalf("Unsupported effect: %s", f.Effect)

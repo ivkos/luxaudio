@@ -1,6 +1,7 @@
 package effects
 
 import (
+	"github.com/ivkos/luxaudio/internal/led"
 	"github.com/ivkos/luxaudio/internal/utils"
 	"log"
 	"net"
@@ -13,9 +14,11 @@ type LuxceptionEffect struct {
 
 	host string
 	port uint16
+
+	pinger *utils.Pinger
 }
 
-func NewLuxceptionEffect(ledCount int, host string, port uint16) Effect {
+func NewLuxceptionEffect(ledCount int, host string, port uint16, pinger *utils.Pinger) Effect {
 	e := &LuxceptionEffect{
 		ledCount: ledCount,
 		ledData:  make([]byte, ledCount*3),
@@ -23,6 +26,8 @@ func NewLuxceptionEffect(ledCount int, host string, port uint16) Effect {
 
 		host: host,
 		port: port,
+
+		pinger: pinger,
 	}
 
 	go e.listen()
@@ -74,7 +79,7 @@ func (e *LuxceptionEffect) handleData(conn *net.UDPConn, addr *net.UDPAddr, data
 	mode := data[2]
 	effectPayloadOffset := 3
 
-	if mode == 0 {
+	if mode == byte(led.Raw) {
 		ledCountInPayload := int(data[effectPayloadOffset])
 		if ledCountInPayload != e.ledCount {
 			log.Printf("Expected %d LEDs, got %d\n", e.ledCount, ledCountInPayload)
@@ -88,6 +93,15 @@ func (e *LuxceptionEffect) handleData(conn *net.UDPConn, addr *net.UDPAddr, data
 		}
 
 		e.colors = data[effectPayloadOffset+1:]
+	} else if mode == byte(led.Ping) {
+		var response string
+		if e.pinger.IsReachable {
+			response = "1"
+		} else {
+			response = "0"
+		}
+
+		_, _ = conn.WriteToUDP([]byte(response), addr)
 	} else {
 		log.Printf("Unsupported mode: %d\n", mode)
 	}
